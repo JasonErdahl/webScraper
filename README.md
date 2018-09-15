@@ -8,6 +8,8 @@ db.notes.remove({})
 
 
 https://webscraper-digg2018.herokuapp.com/
+https://jasonerdahl.github.io/
+https://github.com/JasonErdahl/webScraper
 
 
 FIX FOR HEROKU CONNECTION

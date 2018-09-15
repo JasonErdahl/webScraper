@@ -12,7 +12,7 @@ var cheerio = require("cheerio");
 // Require all models
 var db = require("./models");
 
-//var PORT = 3000;
+//var PORT = 3000; **** THIS LINE WILL NOT WORK WHEN DEPLOYED TO HEROKU ****
 var PORT = process.env.PORT || 3000;
 // Initialize Express
 var app = express();
@@ -44,12 +44,13 @@ app.get("/scrape", function(req, res) {
   //db.Article.remove({});
   //db.Note.remove({});
   /* IMPORTANT THIS CLEARS DATABASE */
-  var promise1 = db.Article.remove({});
-  var promise2 = db.Note.remove({});
-  var promise3 = new Promise(function(resolve, reject) {
-  setTimeout(resolve, 100, 'foo');
-});
-  Promise.all([promise1, promise2, promise3]).then(function() {
+  // var promise1 = db.Article.remove({});
+  // var promise2 = db.Note.remove({});
+  // var promise3 = new Promise(function(resolve, reject) {
+  // setTimeout(resolve, 100, 'foo');
+  // });
+  // Promise.all([promise1, promise2, promise3]).then(function() {
+
     //var scrapeMe = "http://www.echojs.com/";
     var scrapeMe = "http://digg.com/channel/news";
     axios.get(scrapeMe).then(function(response) {
@@ -101,7 +102,7 @@ app.get("/scrape", function(req, res) {
       // If we were able to successfully scrape and save an Article, send a message to the client
       res.send("Scrape Complete");
     });
-  });
+//  });
 });
 
 // Route for getting all Articles from the db
