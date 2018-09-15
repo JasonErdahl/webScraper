@@ -8,3 +8,9 @@ db.notes.remove({})
 
 
 https://webscraper-digg2018.herokuapp.com/
+
+heroku_pfv91925
+mongodb://<dbuser>:<dbpassword>@ds123790.mlab.com:23790/heroku_pfv91925
+
+FIX FOR HEROKU CONNECTION
+PATH="$PATH:/c/Program Files/Heroku/bin"
