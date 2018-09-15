@@ -13,3 +13,5 @@ https://webscraper-digg2018.herokuapp.com/
 FIX FOR HEROKU CONNECTION
 PATH="$PATH:/c/Program Files/Heroku/bin"
 heroku logs
+
+npm i dotenv
