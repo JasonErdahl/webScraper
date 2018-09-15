@@ -29,8 +29,6 @@ app.use(express.static("public"));
 // Connect to the Mongo DB
 // mongoose.connect("mongodb://localhost/diggScraper");
 var MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost/diggScraper";
-// Set mongoose to leverage built in JavaScript ES6 Promises
-// Connect to the Mongo DB
 mongoose.Promise = Promise;
 mongoose.connect(MONGODB_URI);
 
@@ -46,57 +44,63 @@ app.get("/scrape", function(req, res) {
   //db.Article.remove({});
   //db.Note.remove({});
   /* IMPORTANT THIS CLEARS DATABASE */
+  var promise1 = db.Article.remove({});
+  var promise2 = db.Note.remove({});
+  var promise3 = new Promise(function(resolve, reject) {
+  setTimeout(resolve, 100, 'foo');
+});
+  Promise.all([promise1, promise2, promise3]).then(function() {
+    //var scrapeMe = "http://www.echojs.com/";
+    var scrapeMe = "http://digg.com/channel/news";
+    axios.get(scrapeMe).then(function(response) {
 
-  //var scrapeMe = "http://www.echojs.com/";
-  var scrapeMe = "http://digg.com/channel/news";
-  axios.get(scrapeMe).then(function(response) {
+      // Then, we load that into cheerio and save it to $ for a shorthand selector
+      var $ = cheerio.load(response.data);
 
-    // Then, we load that into cheerio and save it to $ for a shorthand selector
-    var $ = cheerio.load(response.data);
+      // Now, we grab every h2 within an article tag, and do the following:
+      //var scrapeLocation = "article h2";
+      var scrapeLocation = ".digg-story__header h2";
+      $(scrapeLocation).each(function(i, element) {
+        // Save an empty result object
+        console.log(element);
+        var result = {};
 
-    // Now, we grab every h2 within an article tag, and do the following:
-    //var scrapeLocation = "article h2";
-    var scrapeLocation = ".digg-story__header h2";
-    $(scrapeLocation).each(function(i, element) {
-      // Save an empty result object
-      console.log(element);
-      var result = {};
+        result.title = $(this)
+          .children("a")
+          .text();
+        result.link = $(this)
+          .children("a")
+          .attr("href");
+        result.summary = $(this)
+          .parent()
+          .parent()
+          .children(".digg-story__dek--truncate")
+          .children("div")
+          .text();
+        result.image = $(this)
+          .parent()
+          .parent()
+          .parent()
+          .children(".digg-story__media-container")
+          .children("figure")
+          .children("a")
+          .children("img")
+          .attr("src");
+        // Create a new Article using the `result` object built from scraping
+        db.Article.create(result)
+          .then(function(dbArticle) {
+            // View the added result in the console
+            console.log(dbArticle);
+          })
+          .catch(function(err) {
+            // If an error occurred, send it to the client
+            return res.json(err);
+          });
+      });
 
-      result.title = $(this)
-        .children("a")
-        .text();
-      result.link = $(this)
-        .children("a")
-        .attr("href");
-      result.summary = $(this)
-        .parent()
-        .parent()
-        .children(".digg-story__dek--truncate")
-        .children("div")
-        .text();
-      result.image = $(this)
-        .parent()
-        .parent()
-        .parent()
-        .children(".digg-story__media-container")
-        .children("figure")
-        .children("a")
-        .children("img")
-        .attr("src");
-      // Create a new Article using the `result` object built from scraping
-      db.Article.create(result)
-        .then(function(dbArticle) {
-          // View the added result in the console
-          console.log(dbArticle);
-        })
-        .catch(function(err) {
-          // If an error occurred, send it to the client
-          return res.json(err);
-        });
+      // If we were able to successfully scrape and save an Article, send a message to the client
+      res.send("Scrape Complete");
     });
-
-    // If we were able to successfully scrape and save an Article, send a message to the client
-    res.send("Scrape Complete");
   });
 });
 
